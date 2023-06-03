@@ -9,6 +9,9 @@ import com.dreamrealm.repository.AuthRepository;
 import com.dreamrealm.repository.RoleRepository;
 import com.dreamrealm.utils.JwtUtils;
 import javax.validation.*;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@Slf4j
 @RequestMapping("/api/auth")
 public class AuthController {
     @Autowired
@@ -57,6 +61,11 @@ public class AuthController {
     }*/
     @Autowired
     JwtUtils jwtUtils;
+    private final RabbitTemplate rabbitTemplate;
+
+    public AuthController (RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
+    }
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginModel loginRequest) {
         System.out.println("test");
@@ -127,6 +136,15 @@ public class AuthController {
         user.setRoles(roles);
         authRepository.save(user);
         return ResponseEntity.ok(new MessageResponseModel("User registered successfully!"));
+    }
+
+    @RequestMapping(value = "/removeAccount", method = RequestMethod.POST)
+    public ResponseEntity<?> removeAccount(@RequestBody RemoveModel remove){
+        log.info("Received request to create offer: {}", remove.getId());
+        rabbitTemplate.convertAndSend("", "q.deleteInfoTrade", remove.getId().toString());
+        rabbitTemplate.convertAndSend("", "q.deleteInfoMessage", remove.getId().toString());
+        authLogic.removeAccount(remove.getId());
+        return ResponseEntity.ok().body(remove.getId());
     }
 
     @GetMapping("/kube")
