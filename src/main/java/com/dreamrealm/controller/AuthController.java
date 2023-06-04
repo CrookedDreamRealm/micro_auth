@@ -143,6 +143,7 @@ public class AuthController {
         log.info("Received request to create offer: {}", remove.getId());
         rabbitTemplate.convertAndSend("", "q.deleteInfoTrade", remove.getId().toString());
         rabbitTemplate.convertAndSend("", "q.deleteInfoMessage", remove.getId().toString());
+        rabbitTemplate.convertAndSend("", "q.deleteReadInfoMessage", remove.getId().toString());
         authLogic.removeAccount(remove.getId());
         return ResponseEntity.ok().body(remove.getId());
     }
