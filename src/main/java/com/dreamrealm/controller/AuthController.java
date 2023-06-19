@@ -152,4 +152,10 @@ public class AuthController {
     public ResponseEntity<?> kube() {
         return ResponseEntity.ok(new MessageResponseModel("trashed"));
     }
+
+    @GetMapping("/test")
+    public ResponseEntity<?> test() {
+        var test = authRepository.findAll();
+        return ResponseEntity.ok(test);
+    }
 }

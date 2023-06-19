@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface RoleRepository extends JpaRepository<RoleDTO, Long> {
-    @Query("SELECT count(*) FROM auth a")
-    Integer findTableEmpty();
+    @Query("SELECT count(*) FROM roles")
+    Long findTableEmpty();
     Optional<RoleDTO> findByName(ERole name);
 }
